@@ -1,0 +1,22 @@
+{
+  "name": "openai-function-calling",
+  "description": "Example of openai function calling - chatbot that create quizzes",
+  "version": "1.0.0",
+  "type": "module",
+  "devDependencies": {
+    "eslint": "^8.56.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-n": "^16.6.1",
+    "eslint-plugin-promise": "^6.1.1"
+  },
+  "dependencies": {
+    "openai": "^4.24.1"
+  },
+  "scripts": {
+    "start": "node src/main.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Davi Stocco",
+  "license": "ISC"
+}
