@@ -1,9 +1,15 @@
-# Gerando Handlers Interpretados com OpenAI Function Calling
+# Gerando Handlers com OpenAI Function Calling e NodeJS.md
 
-Criar handlers com base no texto do usuário é uma excelente maneira de iniciar a incorporação de inteligência artificial em suas aplicações. Neste exemplo, iremos enviar um prompt à IA para criar um quiz sobre um tópico específico. Nossa solicitação será interpretada, e receberemos um handler, que será a função responsável por criar o quiz. O mais legal é que o handler já incluirá todos os argumentos, previamente definidos pela IA.
+O que faremos? Em vez de interagir com uma interface específica da nossa aplicação, onde precisamos detalhar manualmente o caso de uso desejado e seus argumentos, vamos criar uma interface de linguagem natural para atingir o mesmo objetivo.
+
+Neste exemplo, iremos enviar um prompt à IA para criar um quiz sobre um tópico específico. Nossa solicitação será interpretada, e receberemos um handler, que será a função responsável por criar o quiz. O mais legal é que o handler já incluirá todos os argumentos, previamente definidos pela IA.
+
+Assim, em vez de utilizar algo como **createQuiz(/\*\* objeto colossal do quiz \*\*/)**, poderemos simplesmente usar: **'Cria um quiz ae mano, de nível fácil com 5 perguntas sobre fulano.'**
+
+Para este exemplo vamos utilizar OpenAI Function Calling e Node.js.
 
 ## Antes de tudo
-Você precisará fazer um [upgrade](https://platform.openai.com/account/billing/overview) e adicionar créditos à sua conta na OpenAI. Você vai precisar colocar no mínimo $5 dólares. Após concluir esse processo, configure sua `OPENAI_KEY` em sua máquina e estaremos prontos. Pau na bala!!!
+Você precisará fazer um [upgrade](https://platform.openai.com/account/billing/overview) e adicionar créditos à sua conta na OpenAI. Você vai precisar colocar no mínimo $5 dólares. Após concluir esse processo, configure sua **OPENAI_KEY** em sua máquina e estaremos prontos. Pau na bala!!!
 
 ## OpenAI SDK
 Primeiro, instale o sdk da openai:
@@ -12,7 +18,7 @@ npm i openai
 ```
 
 ## Chat Completion
-Agora vamos criar um arquivo chamado `get-interpreted-handler.js`, importar o SDK da OpenAI e criar uma função de chat completion:
+Agora vamos criar um arquivo chamado **get-interpreted-handler.js**, importar o SDK da OpenAI e criar uma função de chat completion:
 ```javascript
 import OpenAI from 'openai'
 
@@ -28,6 +34,7 @@ const chatCompletion = async (messages, functions = null, model = GPT_MODEL, fun
 ```
 
 ## Função para Gerar o Handler
+Copie e cole esta função no mesmo arquivo:
 ```javascript
 export const getInterpretedHandler = async ({ userInput, systemMessage, availableFunctions, functionsSchemas }) => {
   const messages = [
@@ -41,7 +48,7 @@ export const getInterpretedHandler = async ({ userInput, systemMessage, availabl
 }
 ```
 
-`systemMessage` é essencialmente o papel do chatbot e é a primeira mensagem no diálogo. O `userInput` é a primeira mensagem do usuário. Mais adiante, entenderemos isso com mais detalhes:
+O objeto **systemMessage** dentro de **messages** é essencialmente o papel do chatbot e é a primeira mensagem no diálogo. O **userInput** é a primeira mensagem do usuário. Mais adiante, entenderemos isso com mais detalhes:
 ```javascript
 const messages = [
     { role: 'system', content: systemMessage },
@@ -57,13 +64,13 @@ const responseMessage = response.choices[0].message
 
 Por fim, passamos a resposta da OpenAI para nossa função de gerar um handler com base na resposta recebida:
 ```javascript
-const handler = generatehandler(responseMessage, availableFunctions)
+const handler = generateHandler(responseMessage, availableFunctions)
 return handler
 ```
 
-Se a IA decidir que uma função deve ser chamada, a variável `responseMessage.function_call` conterá o nome e os argumentos da função definida dentro dos schemas que enviamos. Caso contrário, retornaremos um handler de console log com a resposta da IA:
+Se a IA decidir que uma função deve ser chamada, a variável **responseMessage.function_call** conterá o nome e os argumentos da função definida dentro dos schemas que enviamos. Caso contrário, retornaremos um handler de console log com a resposta da IA:
 ```javascript
-const generatehandler = (responseMessage, functions) => {
+const generateHandler = (responseMessage, functions) => {
   if (!responseMessage.function_call) {
     return () => console.log(responseMessage.content)
   }
@@ -75,7 +82,7 @@ const generatehandler = (responseMessage, functions) => {
 ```
 
 ## Criando a Interação
-Agora que temos a estrutura pronta, vamos criar o nosso módulo de exemplo para simular uma interação. Crie um arquivo chamado `example-module.js` e cole o seguinte código:
+Agora que temos a estrutura pronta, vamos criar o nosso módulo de exemplo para simular uma interação. Crie um arquivo chamado **example-module.js** e cole o seguinte código:
 
 ```javascript
 const quizzes = []
@@ -141,9 +148,9 @@ export const quizSchemas = [
 
 ```
 
-O ponto importante aqui é a constante `quizSchemas`. Nela, definimos quais funções queremos que a IA gere uma chamada. Quanto mais detalhado for, melhor serão os argumentos gerados pela IA.
+O ponto importante aqui é a constante **quizSchemas**. Nela, definimos quais funções queremos que a IA gere uma chamada. Quanto mais detalhado for, melhor serão os argumentos gerados pela IA.
 
-Por fim, crie o arquivo `main.js` onde montaremos todo esse fluxo:
+Por fim, crie o arquivo **main.js** onde montaremos todo esse fluxo:
 ```javascript
 import { createQuiz, getQuizzes, quizSchemas } from './example-module.js'
 import { getInterpretedHandler } from './get-interpreted-handler.js'
@@ -250,7 +257,7 @@ Este é o resultado do quiz gerado pela IA:
 ]
 ```
 
-Se o input do usuário estiver além do escopo estabelecido na mensagem do sistema (`systemMessage`), o handler que mencionamos anteriormente, aquele que gera um console log, será ativado automaticamente por default.
+Se o input do usuário estiver além do escopo estabelecido na mensagem do sistema (**systemMessage**), o handler que mencionamos anteriormente, aquele que gera um console log, será ativado automaticamente por default.
 
 Chamada:
 ```javascript
@@ -269,7 +276,7 @@ Desculpe, mas não consigo recitar um poema de Ednaldo Pereira, pois minha funç
 ```
 
 ## Conclusão
-De forma abrangente e explicativa, o uso de chamadas de funções da OpenAI é extremamente útil para integrar IAs em suas aplicações, especialmente em funções que exigem estruturas de dados altamente específicas e padronizadas. Em vez de simplesmente solicitar à IA que escreva um quiz, você definiu esquemas e criou chamadas de funções para que a IA respeitasse as interfaces de sua aplicação. Agora, por exemplo, você pode criar uma aplicação que gera quizzes sob demanda, os quais podem ser manipulados pelos usuários.
+De forma abrangente e explicativa, o uso de function calling é extremamente útil para integrar IAs em suas aplicações, especialmente em funções que exigem estruturas de dados específicas e padronizadas. Em vez de simplesmente solicitar à IA que escreva um quiz, você definiu esquemas e criou chamadas de funções para que a IA respeitasse as interfaces de sua aplicação. Agora, por exemplo, você pode criar uma aplicação que gera quizzes sob demanda, os quais podem ser manipulados pelos usuários.
 
 Neste exemplo, definimos apenas uma função nos esquemas, mas você pode definir várias funções nas quais a IA irá interpretar qual delas chamar com base no input do usuário ou até mesmo pedir à IA para executar mais de uma função. As possibilidades são muitas e na seção de referências, coloquei alguns artigos que abordam esse tema em maior profundidade.
 
